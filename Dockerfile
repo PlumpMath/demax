@@ -1,17 +1,16 @@
 FROM centos:7
 
-RUN yum -y update && \
-    yum -y install emacs xterm && \
-    useradd developer && \
-    dbus-uuidgen > /var/lib/dbus/machine-id
+RUN yum -y install epel-release && \
+    yum -y update && \
+    yum -y install \
+        emacs sudo passwd git bash-completion tmux \
+        man man-pages yum-utils rxvt-unicode-256color erlang && \
+    useradd -G wheel dev && \
+    dbus-uuidgen > /var/lib/dbus/machine-id && \
+    echo "dev  ALL=(ALL)       NOPASSWD: ALL" > /etc/sudoers.d/dev && \
+    git clone https://github.com/massemanet/dotfiles.centos.git /tmp && \
+    mv /tmp/.git /home/dev && \
+    (cd /home/dev ; git reset --hard ; chown -R dev.dev .)
 
-# # Replace 1000 with your user / group id
-# RUN export uid=1000 gid=1000 && \
-#     mkdir -p /home/developer && \
-#     useradd ... \
-#     chmod 0440 /etc/sudoers.d/developer && \
-#     chown ${uid}:${gid} -R /home/developer
-
-USER developer
-ENV HOME /home/developer
+USER dev
 CMD /usr/bin/emacs
